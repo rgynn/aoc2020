@@ -11,18 +11,31 @@ import (
 )
 
 type bag struct {
-	Color  string
+	Color string
+	Rules []rule
+}
+
+type rule struct {
 	Amount int
-	Rules  []bag
+	Color  string
 }
 
 func (b *bag) Contains(color string) bool {
-	for _, bg := range b.Rules {
-		if bg.Color == color {
+	for _, r := range b.Rules {
+		if r.Color == color {
 			return true
 		}
 	}
 	return false
+}
+
+func (b *bag) ContainsAmount(color string) int {
+	for _, r := range b.Rules {
+		if r.Color == color {
+			return r.Amount
+		}
+	}
+	return 0
 }
 
 func main() {
@@ -37,33 +50,51 @@ func main() {
 		log.Fatalf("FATAL: %v", err)
 	}
 
-	containsDirectly := []bag{}
-
-	for _, bg := range bags {
-		if bg.Contains("shiny gold") {
-			containsDirectly = append(containsDirectly, bg)
-			log.Printf("%s bags contain shiny gold bags directly", bg.Color)
-		}
-	}
-
-	containsInDirectly := []bag{}
-	for _, bg := range bags {
-		for _, cdbg := range containsDirectly {
-			if bg.Contains(cdbg.Color) {
-				containsInDirectly = append(containsInDirectly, bg)
-				log.Printf("%s bags contain shiny gold bags indirectly", bg.Color)
-			}
-		}
-	}
-
-	one := len(containsDirectly) + len(containsInDirectly)
+	one := partOne(bags)
+	two := partTwo(bags)
 
 	log.Printf("Answer to part one: %d", one)
+	log.Printf("Answer to part two: %d", two)
 }
 
-func readInput(file []byte) ([]bag, error) {
+func partOne(bags map[string]bag) int {
+	sum := 0
+	for _, bg := range bags {
+		if canContainGold(bg.Color, bags) && bg.Color != "shiny gold" {
+			sum++
+		}
+	}
+	return sum
+}
 
-	bags := []bag{}
+func partTwo(bags map[string]bag) int {
+	return countBags("shiny gold", bags)
+}
+
+func canContainGold(color string, bags map[string]bag) bool {
+	if color == "shiny gold" {
+		return true
+	}
+	for _, ib := range bags[color].Rules {
+		if canContainGold(ib.Color, bags) {
+			return true
+		}
+	}
+	return false
+}
+
+func countBags(color string, bags map[string]bag) int {
+	sum := 0
+	for _, r := range bags[color].Rules {
+		subCount := countBags(r.Color, bags)
+		sum += r.Amount + r.Amount*subCount
+	}
+	return sum
+}
+
+func readInput(file []byte) (map[string]bag, error) {
+
+	bags := map[string]bag{}
 
 	scanner := bufio.NewScanner(bytes.NewBufferString(string(file)))
 	for scanner.Scan() {
@@ -73,14 +104,14 @@ func readInput(file []byte) ([]bag, error) {
 		color := ruleSplit[0]
 		rules := strings.Split(ruleSplit[1], ", ")
 
-		bg := bag{Color: color, Rules: []bag{}}
+		bg := bag{Color: color}
 
 		if !(ruleSplit[1] == "no other bags") {
-			for _, rule := range rules {
+			for _, r := range rules {
 
-				rule = strings.TrimSuffix(rule, " bags")
-				rule = strings.TrimSuffix(rule, " bag")
-				ruleSplit = strings.Split(rule, " ")
+				r = strings.TrimSuffix(r, " bags")
+				r = strings.TrimSuffix(r, " bag")
+				ruleSplit = strings.Split(r, " ")
 
 				num, err := strconv.Atoi(ruleSplit[0])
 				if err != nil {
@@ -88,11 +119,11 @@ func readInput(file []byte) ([]bag, error) {
 				}
 
 				color := fmt.Sprintf("%s %s", ruleSplit[1], ruleSplit[2])
-				bg.Rules = append(bg.Rules, bag{Amount: num, Color: color})
+				bg.Rules = append(bg.Rules, rule{Amount: num, Color: color})
 			}
 		}
 
-		bags = append(bags, bg)
+		bags[bg.Color] = bg
 	}
 
 	return bags, nil
