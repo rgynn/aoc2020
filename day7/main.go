@@ -29,15 +29,6 @@ func (b *bag) Contains(color string) bool {
 	return false
 }
 
-func (b *bag) ContainsAmount(color string) int {
-	for _, r := range b.Rules {
-		if r.Color == color {
-			return r.Amount
-		}
-	}
-	return 0
-}
-
 func main() {
 
 	file, err := ioutil.ReadFile("input")
@@ -57,39 +48,38 @@ func main() {
 	log.Printf("Answer to part two: %d", two)
 }
 
-func partOne(bags map[string]bag) int {
-	sum := 0
+func partOne(bags map[string]bag) (sum int) {
 	for _, bg := range bags {
-		if canContainGold(bg.Color, bags) && bg.Color != "shiny gold" {
+		if bg.Color != "shiny gold" &&
+			containsShinyGold(bg.Color, bags) {
 			sum++
 		}
 	}
-	return sum
+	return
 }
 
 func partTwo(bags map[string]bag) int {
 	return countBags("shiny gold", bags)
 }
 
-func canContainGold(color string, bags map[string]bag) bool {
+func containsShinyGold(color string, bags map[string]bag) bool {
 	if color == "shiny gold" {
 		return true
 	}
 	for _, ib := range bags[color].Rules {
-		if canContainGold(ib.Color, bags) {
+		if containsShinyGold(ib.Color, bags) {
 			return true
 		}
 	}
 	return false
 }
 
-func countBags(color string, bags map[string]bag) int {
-	sum := 0
+func countBags(color string, bags map[string]bag) (sum int) {
 	for _, r := range bags[color].Rules {
 		subCount := countBags(r.Color, bags)
 		sum += r.Amount + r.Amount*subCount
 	}
-	return sum
+	return
 }
 
 func readInput(file []byte) (map[string]bag, error) {
