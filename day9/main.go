@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"log"
+	"sort"
 	"strconv"
 )
 
@@ -30,6 +31,46 @@ func main() {
 	}
 
 	log.Printf("Answer to part one: %d", one)
+
+	var two int
+	var matches []int
+
+streamloop:
+	for i, x := range stream {
+
+		if x == one {
+			matches = []int{}
+			continue
+		}
+
+		// step backwards from i in stream
+		for y := i; y >= 0; y-- {
+
+			matches = append(matches, stream[y])
+
+			var sum int
+			for _, z := range matches {
+
+				sum += z
+
+				if sum < one {
+					continue
+				}
+
+				if sum == one {
+					sort.Slice(matches, func(i, j int) bool { return matches[i] > matches[j] })
+					two = matches[0] + matches[len(matches)-1]
+					break streamloop
+				}
+
+				if sum > one {
+					matches = []int{}
+				}
+			}
+		}
+	}
+
+	log.Printf("Answer to part two: %d", two)
 }
 
 func valid(input int, preamble []int) bool {
