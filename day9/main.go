@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"sort"
@@ -32,10 +33,17 @@ func main() {
 
 	log.Printf("Answer to part one: %d", one)
 
-	var two int
-	var matches []int
+	two, err := partTwo(one, stream)
+	if err != nil {
+		log.Fatalf("FATAL: %v", err)
+	}
 
-streamloop:
+	log.Printf("Answer to part two: %d", *two)
+}
+
+func partTwo(one int, stream []int) (*int, error) {
+
+	var matches []int
 	for i, x := range stream {
 
 		if x == one {
@@ -43,24 +51,20 @@ streamloop:
 			continue
 		}
 
-		// step backwards from i in stream
 		for y := i; y >= 0; y-- {
-
 			matches = append(matches, stream[y])
 
 			var sum int
 			for _, z := range matches {
-
 				sum += z
-
 				if sum < one {
 					continue
 				}
 
 				if sum == one {
 					sort.Slice(matches, func(i, j int) bool { return matches[i] > matches[j] })
-					two = matches[0] + matches[len(matches)-1]
-					break streamloop
+					two := matches[0] + matches[len(matches)-1]
+					return &two, nil
 				}
 
 				if sum > one {
@@ -70,7 +74,7 @@ streamloop:
 		}
 	}
 
-	log.Printf("Answer to part two: %d", two)
+	return nil, fmt.Errorf("Failed to find series of numbers that equals: %d", one)
 }
 
 func valid(input int, preamble []int) bool {
