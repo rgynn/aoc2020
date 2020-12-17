@@ -5,7 +5,27 @@ import (
 	"testing"
 )
 
-func TestPartOneTwo(t *testing.T) {
+func TestPartTwoOne(t *testing.T) {
+
+	file, err := ioutil.ReadFile("input_test_1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	adapters, err := readInput(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	builtIn := getBuiltInAdapter(adapters)
+
+	two := partTwo(builtIn, adapters)
+	if two != 8 {
+		t.Fatalf("expected answer to part two to be: %d, got: %d", 8, two)
+	}
+}
+
+func TestPartTwoTwo(t *testing.T) {
 
 	file, err := ioutil.ReadFile("input_test_2")
 	if err != nil {
@@ -19,9 +39,9 @@ func TestPartOneTwo(t *testing.T) {
 
 	builtIn := getBuiltInAdapter(adapters)
 
-	one := partOne(builtIn, adapters)
-	if one != 220 {
-		t.Fatalf("expected answer to part one to be: %d, got: %d", 220, one)
+	two := partTwo(builtIn, adapters)
+	if two != 19208 {
+		t.Fatalf("expected answer to part two to be: %d, got: %d", 19208, two)
 	}
 }
 
@@ -42,6 +62,26 @@ func TestPartOneOne(t *testing.T) {
 	one := partOne(builtIn, adapters)
 	if one != 35 {
 		t.Fatalf("expected answer to part one to be: %d, got: %d", 35, one)
+	}
+}
+
+func TestPartOneTwo(t *testing.T) {
+
+	file, err := ioutil.ReadFile("input_test_2")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	adapters, err := readInput(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	builtIn := getBuiltInAdapter(adapters)
+
+	one := partOne(builtIn, adapters)
+	if one != 220 {
+		t.Fatalf("expected answer to part one to be: %d, got: %d", 220, one)
 	}
 }
 

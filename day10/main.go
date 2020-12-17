@@ -44,9 +44,24 @@ func main() {
 
 	builtIn := getBuiltInAdapter(adapters)
 
-	log.Printf("Built-in adapter: %+v", builtIn)
-
 	log.Printf("Answer to part one: %d", partOne(builtIn, adapters))
+	log.Printf("Answer to part two: %d", partTwo(builtIn, adapters))
+}
+
+func partTwo(builtIn adapter, adapters []adapter) int {
+
+	adapters = append([]adapter{adapter{}}, adapters...)
+	adapters = append(adapters, builtIn)
+
+	// Memoization map used to calculate number of combinations per step
+	m := map[int]int{0: 1}
+	for _, a := range adapters {
+		for n := -3; n <= -1; n++ {
+			m[a.output] += m[a.output+n]
+		}
+	}
+
+	return m[builtIn.output]
 }
 
 func partOne(builtIn adapter, adapters []adapter) int {
